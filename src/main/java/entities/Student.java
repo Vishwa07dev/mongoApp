@@ -6,7 +6,7 @@ import com.mongodb.DBObject;
 
 public class Student {
 
-  private int id ;
+  private int id;
   private String name ;
   private int courseId ;
   private int age ;
@@ -18,12 +18,14 @@ public class Student {
     this.age = age;
   }
 
-  public DBObject createDBObject() {
-    BasicDBObjectBuilder docBuilder = BasicDBObjectBuilder.start();
 
+  public DBObject createDBObject(){
+    BasicDBObjectBuilder docBuilder = BasicDBObjectBuilder.start();
     docBuilder.append("_id", this.getId());
-    docBuilder.append("name", this.getCourseId());
+    docBuilder.append("name", this.getName());
+    docBuilder.append("courseId", this.getCourseId());
     docBuilder.append("age", this.getAge());
+
     return docBuilder.get();
   }
 
