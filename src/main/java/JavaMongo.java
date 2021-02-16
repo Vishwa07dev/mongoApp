@@ -1,35 +1,57 @@
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.MongoClient;
-import java.net.UnknownHostException;
-import java.util.Arrays;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
+
+import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Sorts.*;
 
 
+/***
+ * This class contains few filter operations on ecommerce datasets
+ */
 public class JavaMongo {
 
-  public static void main(String[] args) throws UnknownHostException {
+  public static void main(String[] args) {
 
-    MongoClient mongoClient = new MongoClient("100.26.206.112", 27017);
+    System.out.println("Hello Mongo");
 
-    DB db = mongoClient.getDB("products");
+    MongoClient mongoClient = MongoClients.create("mongodb://ec2-52-23-240-26.compute-1.amazonaws.com");
 
-    DBCollection col = db.getCollection("purchases");
+    mongoClient.listDatabases().forEach(db -> System.out.println(db.toJson()));
 
-    BasicDBObject basicDBObject = new BasicDBObject();
-    basicDBObject.put("Sales" , new BasicDBObject("$gte",3000));
-    //basicDBObject.put("Profit" , new BasicDBObject("$gte",2000));
+    //Searching for the data
 
+    MongoDatabase mongoDatabase = mongoClient.getDatabase("products");
+    MongoCollection<Document> purchaseCollection = mongoDatabase.getCollection("purchases");
 
-    DBCursor result = col.find(basicDBObject);
-    while(result.hasNext()){
-      System.out.println(result.next());
+    for (Document document : purchaseCollection.find()) {
+      System.out.println(document.toJson());
     }
 
+    System.out.println("<--------- Getting one data -----------------> ");
 
-   // db.purchases.aggregate([{$group:{_id:null, total: {$sum: '$Sales'}}}])
+    Document doc = purchaseCollection.find(eq("Order ID", "IN-2014-76016")).first();
 
+    System.out.println(doc);
 
+    System.out.println(" <-------- Filtering the result------------------>");
+
+    for (Document document : purchaseCollection.find(gte("Sales", 3000))) {
+      System.out.println(document.toJson());
+    }
+
+    System.out.println("<------  Multiple filters -------------------->");
+
+    for (Document document : purchaseCollection.find(and(gte("Sales", 3000), lte("Profit", 2000)))) {
+      System.out.println(document.toJson());
+    }
+
+    System.out.println("<------ Sorting the data --------->");
+
+    for (Document document : purchaseCollection.find(gte("Sales", 2000)).sort(ascending("Sales"))) {
+      System.out.println(document.toJson());
+    }
   }
 }

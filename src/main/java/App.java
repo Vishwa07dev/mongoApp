@@ -1,73 +1,72 @@
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.WriteResult;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import entities.Student;
-import java.net.UnknownHostException;
+import java.util.ArrayList;
+import org.bson.Document;
 import java.util.List;
+import org.bson.conversions.Bson;
 
 
+import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Updates.*;
+
+
+/**
+ * This class contains the code for the CRUD operations
+ *
+ */
 public class App {
 
-  public static void main(String[] args) throws UnknownHostException {
+  public static void main(String[] args) {
 
-    MongoClient mongoClient = new MongoClient("54.197.64.163", 27017);
-//    List<String> dbs = mongoClient.getDatabaseNames();
-//    System.out.println("List of database are : "+dbs);
+    MongoClient mongoClient = MongoClients.create("mongodb://ec2-52-23-240-26.compute-1.amazonaws.com");
+    System.out.println("<------ Inserting a record --------->");
+    MongoDatabase sampleTrainingDB = mongoClient.getDatabase("upgrad");
+    MongoCollection<Document> studentsCollection = sampleTrainingDB.getCollection("students");
 
-    /**
-     * Write the code to ingest the data into mongodb
-     */
+    Student student = new Student(1, "Abhinav", 356, 28);
+    System.out.println(studentsCollection.insertOne(student.createDBObject()));
 
-    Student student = new Student(1, "Abhinav",356, 28);
+    System.out.println("<!----- Bulk insert ----------->");
+    List<Document> documentList = getDocuments();
+    System.out.println(studentsCollection.insertMany(documentList));
 
-    DBObject doc = student.createDBObject();
+    System.out.println("<! ------ Reading the data ---->");
+    for (Document document : studentsCollection.find()) {
+      System.out.println(document.toJson());
+    }
 
-    DB db = mongoClient.getDB("upgrad");
+    System.out.println("< --- Reading one record -------->");
+    Bson filter = eq("name", "Akash");
+    System.out.println((studentsCollection.find(filter)).first().toJson());
 
-    DBCollection col = db.getCollection("students");
+    System.out.println("< --- Updating the record -----> ");
+    Bson updateOperation = set("age", 1111);
+    System.out.println(studentsCollection.updateOne(filter, updateOperation));
+    System.out.println((studentsCollection.find(filter)).first().toJson());
 
-//    WriteResult result = col.insert(doc);
-//    System.out.println(result.toString());
+    System.out.println("<! ---- Deleting the records in the db ---------> ");
+    System.out.println(studentsCollection.deleteOne(eq("name", "Abhinav")));
 
-//    /**
-//     * Data before update
-//     */
-//    DBObject query = BasicDBObjectBuilder.start().add("_id", student.getId()).get();
-//
-//    DBCursor cursor = col.find(query);
-//
-//    while(cursor.hasNext()){
-//      System.out.println("Data before update : "+ cursor.next());
-//    }
-//
-//    /**
-//     * Updating the data in Mongo DB
-//     */
-//    student.setName("Vishwa");
-//    doc = student.createDBObject();
-//
-//    WriteResult result = col.update(query, doc);
-//    System.out.println(result.toString());
-//
-//    /**
-//     * Reading the data from Mongo DB
-//     */
-//    cursor = col.find(query);
-//
-//    while(cursor.hasNext()){
-//      System.out.println("Data after update" + cursor.next());
-//    }
+    System.out.println("<! ---- Deleting the entire collection in the db ---------> ");
+    studentsCollection.drop();
+  }
 
-    DBObject query = BasicDBObjectBuilder.start().add("_id", student.getId()).get();
-    WriteResult result = col.remove(query);
-    System.out.println(result.toString());
+  private static List<Document> getDocuments() {
+    Student student1 = new Student(1, "Vishwa", 356, 99);
+    Student student2 = new Student(1, "Mohan", 205, 102);
+    Student student3 = new Student(1, "Akash", 179, 77);
+    Student student4 = new Student(1, "Akansha", 258, 55);
+    Student student5 = new Student(1, "Shivani", 301, 43);
 
-
-    //close resources
-    mongoClient.close();
+    List<Document> documentList = new ArrayList<>();
+    documentList.add(student1.createDBObject());
+    documentList.add(student2.createDBObject());
+    documentList.add(student3.createDBObject());
+    documentList.add(student4.createDBObject());
+    documentList.add(student5.createDBObject());
+    return documentList;
   }
 }

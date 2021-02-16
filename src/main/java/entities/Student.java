@@ -1,7 +1,7 @@
 package entities;
 
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DBObject;
+import java.util.Random;
+import org.bson.Document;
 
 
 public class Student {
@@ -19,15 +19,18 @@ public class Student {
   }
 
 
-  public DBObject createDBObject(){
-    BasicDBObjectBuilder docBuilder = BasicDBObjectBuilder.start();
-    docBuilder.append("_id", this.getId());
-    docBuilder.append("name", this.getName());
-    docBuilder.append("courseId", this.getCourseId());
-    docBuilder.append("age", this.getAge());
+  public Document createDBObject(){
+    Random rand = new Random();
+    Document student  = new Document();
+    student.append("_id", rand.nextDouble() * 100);
+    student.append("name", this.getName());
+    student.append("courseId", this.getCourseId());
+    student.append("age", this.getAge());
 
-    return docBuilder.get();
+    return student ;
   }
+
+
 
   @Override
   public String toString() {
