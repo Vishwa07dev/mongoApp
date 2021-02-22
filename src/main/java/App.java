@@ -21,7 +21,7 @@ public class App {
 
   public static void main(String[] args) {
 
-    MongoClient mongoClient = MongoClients.create("mongodb://ec2-52-23-240-26.compute-1.amazonaws.com");
+    MongoClient mongoClient = MongoClients.create("mongodb://ec2-3-94-86-35.compute-1.amazonaws.com");
     System.out.println("<------ Inserting a record --------->");
     MongoDatabase sampleTrainingDB = mongoClient.getDatabase("upgrad");
     MongoCollection<Document> studentsCollection = sampleTrainingDB.getCollection("students");
